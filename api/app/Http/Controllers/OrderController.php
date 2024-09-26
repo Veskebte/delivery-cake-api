@@ -20,7 +20,7 @@ class OrderController extends Controller
             'customer_name' => 'required',
             'customer_address' => 'required',
             'delivery_date' => 'required|date',
-            'payment_method' => 'required|in:credit_card,paypal,cash',
+            'payment_method' => 'required|in:cashless,cash',
         ]);
 
         $order = Order::create($request->all());
@@ -38,7 +38,7 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         $order->update($request->all());
 
-        return Order::with('cake')->find($id); 
+        return Order::with('cake')->find($id);
     }
 
     public function destroy($id)
