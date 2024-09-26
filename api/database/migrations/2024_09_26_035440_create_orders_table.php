@@ -16,9 +16,12 @@ return new class extends Migration
             $table->foreignId('cake_id')->constrained()->onDelete('cascade');
             $table->string('customer_name');
             $table->string('customer_address');
+            $table->string('status')->default('pending');
             $table->dateTime('delivery_date');
+            $table->string('payment_method');   
             $table->timestamps();
         });
+
 
     }
 
