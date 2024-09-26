@@ -9,6 +9,15 @@ class Cake extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'flavor', 'size', 'price']; 
-}
+    protected $fillable = [
+        'name',
+        'flavor',
+        'size',
+        'price'
+    ];
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+}

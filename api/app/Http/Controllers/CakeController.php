@@ -7,11 +7,9 @@ use Illuminate\Http\Request;
 
 class CakeController extends Controller
 {
-    // Menampilkan daftar kue
     public function index()
     {
-        $cakes = Cake::all();
-        return response()->json($cakes);
+        return Cake::all();
     }
 
     public function store(Request $request)
@@ -20,38 +18,29 @@ class CakeController extends Controller
             'name' => 'required',
             'flavor' => 'required',
             'size' => 'required',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric'
         ]);
 
-        $cake = Cake::create($request->all());
-        return response()->json($cake);
+        return Cake::create($request->all());
     }
 
-    // untuk menampilkan kue berdasarkan id
     public function show($id)
     {
-        $cake = Cake::findOrFail($id);
-        return response()->json($cake);
+        return Cake::findOrFail($id);
     }
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'flavor' => 'required',
-            'size' => 'required',
-            'price' => 'required|numeric',
-        ]);
-
         $cake = Cake::findOrFail($id);
         $cake->update($request->all());
-        return response()->json($cake);
+
+        return $cake;
     }
 
     public function destroy($id)
     {
-        $cake = Cake::findOrFail($id);
-        $cake->delete();
-        return response()->json(['message' => 'Cake deleted successfully']);
+        Cake::findOrFail($id)->delete();
+        return response()->noContent();
     }
 }
+

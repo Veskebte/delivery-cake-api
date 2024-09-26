@@ -4,32 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateOrdersTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cake_id')->constrained()->onDelete('cascade');
+            $table->foreignId('cake_id')->constrained('cakes')->onDelete('cascade');
             $table->string('customer_name');
             $table->string('customer_address');
-            $table->string('status')->default('pending');
-            $table->dateTime('delivery_date');
-            $table->string('payment_method');   
+            $table->enum('status', ['pending', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->timestamp('delivery_date');
+            $table->enum('payment_method', ['cashless', 'cash']);
             $table->timestamps();
         });
-
-
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('orders');
     }
-};
+}
