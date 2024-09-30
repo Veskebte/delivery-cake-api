@@ -34,5 +34,3 @@ class Order extends Model
             ->get();
     }
 }
-
-

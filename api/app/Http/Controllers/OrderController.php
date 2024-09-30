@@ -31,40 +31,6 @@ class OrderController extends Controller
         return Order::with('cake')->find($order->id);
     }
 
-    public function getSalesByMonth(Request $request)
-    {
-        $validated = $request->validate([
-            'month' => 'required|date_format:m',
-            'year' => 'required|integer|between:1900,2100',
-        ]);
-
-        $monthYear = $validated['year'] . '-' . $validated['month'];
-
-        $salesData = Order::getTotalCakeSoldPerMonth($monthYear);
-
-        if ($salesData->isEmpty()) {
-            $response['success'] = false;
-            $response['message'] = 'Tidak ada data penjualan untuk bulan ini.';
-            return response()->json($response, Response::HTTP_NOT_FOUND);
-        }
-
-        $totalSold = 0;
-        $formattedSales = [];
-        foreach ($salesData as $sale) {
-            $totalSold += $sale->total;
-            $formattedSales[] = [
-                'cake_name' => $sale->cake->name,
-                'size' => $sale->size,
-                'total_sold' => $sale->total,
-            ];
-        }
-
-        $response['success'] = true;
-        $response['total_sold'] = $totalSold;
-        $response['sales_details'] = $formattedSales;
-        return response()->json($response, Response::HTTP_OK);
-    }
-
     public function show($id)
     {
         $order = Order::with('cake')->find($id);
@@ -118,4 +84,3 @@ class OrderController extends Controller
         }
     }
 }
-
