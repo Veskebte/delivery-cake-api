@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Cake;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class OrderController extends Controller
 {
     public function index()
     {
-        return Order::with('cake')->get();
+        $orders = Order::with('cake')->get();
+        $data['success'] = true;
+        $data['result'] = $orders;
+        return response()->json($data, Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validate = $request->validate([
             'cake_id' => 'required|exists:cakes,id',
             'customer_name' => 'required',
             'customer_address' => 'required',
@@ -28,23 +31,91 @@ class OrderController extends Controller
         return Order::with('cake')->find($order->id);
     }
 
+    public function getSalesByMonth(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => 'required|date_format:m',
+            'year' => 'required|integer|between:1900,2100',
+        ]);
+
+        $monthYear = $validated['year'] . '-' . $validated['month'];
+
+        $salesData = Order::getTotalCakeSoldPerMonth($monthYear);
+
+        if ($salesData->isEmpty()) {
+            $response['success'] = false;
+            $response['message'] = 'Tidak ada data penjualan untuk bulan ini.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
+
+        $totalSold = 0;
+        $formattedSales = [];
+        foreach ($salesData as $sale) {
+            $totalSold += $sale->total;
+            $formattedSales[] = [
+                'cake_name' => $sale->cake->name,
+                'size' => $sale->size,
+                'total_sold' => $sale->total,
+            ];
+        }
+
+        $response['success'] = true;
+        $response['total_sold'] = $totalSold;
+        $response['sales_details'] = $formattedSales;
+        return response()->json($response, Response::HTTP_OK);
+    }
+
     public function show($id)
     {
-        return Order::with('cake')->findOrFail($id);
+        $order = Order::with('cake')->find($id);
+        if ($order) {
+            $response['success'] = true;
+            $response['result'] = $order;
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Order tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-        $order->update($request->all());
+        $validate = $request->validate([
+            'cake_id' => 'required|exists:cakes,id',
+            'customer_name' => 'required|string',
+            'customer_address' => 'required|string',
+            'status' => 'required|in:pending,shipped,delivered,cancelled',
+            'delivery_date' => 'required|date',
+            'payment_method' => 'required|in:cashless,cash',
+        ]);
 
-        return Order::with('cake')->find($id);
+        $order = Order::where('id', $id)->update($validate);
+        if ($order) {
+            $response['success'] = true;
+            $response['message'] = 'Order berhasil diperbarui.';
+            $response['result'] = Order::with('cake')->find($id);
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Order tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function destroy($id)
     {
-        Order::findOrFail($id)->delete();
-        return response()->noContent();
+        $order = Order::where('id', $id);
+        if ($order->exists()) {
+            $order->delete();
+            $response['success'] = true;
+            $response['message'] = 'Order berhasil dihapus.';
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Order tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 }
 
