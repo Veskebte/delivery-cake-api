@@ -4,43 +4,83 @@ namespace App\Http\Controllers;
 
 use App\Models\Cake;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CakeController extends Controller
 {
     public function index()
     {
-        return Cake::all();
+        $cakes = Cake::all();
+        $data['success'] = true;
+        $data['result'] = $cakes;
+        return response()->json($data, Response::HTTP_OK);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validate = $request->validate([
             'name' => 'required',
             'flavor' => 'required',
             'size' => 'required',
             'price' => 'required|numeric'
         ]);
 
-        return Cake::create($request->all());
+        $cake = Cake::create($validate);
+        if ($cake) {
+            $response['success'] = true;
+            $response['message'] = 'Cake berhasil ditambahkan.';
+            return response()->json($response, Response::HTTP_CREATED);
+        }
     }
 
     public function show($id)
     {
-        return Cake::findOrFail($id);
+        $cake = Cake::find($id);
+        if ($cake) {
+            $response['success'] = true;
+            $response['result'] = $cake;
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Cake tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $cake = Cake::findOrFail($id);
-        $cake->update($request->all());
+        $validate = $request->validate([
+            'name' => 'required|string',
+            'flavor' => 'required|string',
+            'size' => 'required|string',
+            'price' => 'required|numeric'
+        ]);
 
-        return $cake;
+        $cake = Cake::where('id', $id)->update($validate);
+        if ($cake) {
+            $response['success'] = true;
+            $response['message'] = 'Cake berhasil diperbarui.';
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Cake tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 
     public function destroy($id)
     {
-        Cake::findOrFail($id)->delete();
-        return response()->noContent();
+        $cake = Cake::where('id', $id);
+        if ($cake->exists()) {
+            $cake->delete();
+            $response['success'] = true;
+            $response['message'] = 'Cake berhasil dihapus.';
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Cake tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
     }
 }
 
