@@ -10,6 +10,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/cakes', [CakeController::class, 'index']);
     Route::post('/cakes', [CakeController::class, 'store']);
@@ -25,8 +28,3 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus']);
 });
-
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
-
-
