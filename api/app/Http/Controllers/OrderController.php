@@ -51,7 +51,6 @@ class OrderController extends Controller
             'cake_id' => 'required|exists:cakes,id',
             'customer_name' => 'required|string',
             'customer_address' => 'required|string',
-            'status' => 'required|in:pending,shipped,delivered,cancelled',
             'delivery_date' => 'required|date',
             'payment_method' => 'required|in:cashless,cash',
         ]);
@@ -61,6 +60,26 @@ class OrderController extends Controller
             $response['success'] = true;
             $response['message'] = 'Order berhasil diperbarui.';
             $response['result'] = Order::with('cake')->find($id);
+            return response()->json($response, Response::HTTP_OK);
+        } else {
+            $response['success'] = false;
+            $response['message'] = 'Order tidak ditemukan.';
+            return response()->json($response, Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validate = $request->validate([
+            'status' => 'required|in:pending,shipped,delivered,cancelled',
+        ]);
+
+        $order = Order::find($id);
+        if ($order) {
+            $order->update(['status' => $validate['status']]);
+            $response['success'] = true;
+            $response['message'] = 'Status order berhasil diperbarui.';
+            $response['result'] = $order;
             return response()->json($response, Response::HTTP_OK);
         } else {
             $response['success'] = false;
