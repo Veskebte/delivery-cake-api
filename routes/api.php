@@ -13,7 +13,7 @@ Route::get('/user', function (Request $request) {
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
+// Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/cakes', [CakeController::class, 'index']);
     Route::post('/cakes', [CakeController::class, 'store']);
     Route::get('/cakes/{id}', [CakeController::class, 'show']);
@@ -27,4 +27,4 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 
     Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus']);
-});
+// });
